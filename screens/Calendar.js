@@ -5,22 +5,103 @@ import {
   TextInput,
   StyleSheet,
   ImageBackground,
+  FlatList
 } from "react-native";
-import { useState } from "react";
-import background from "../assets/detailBckGrnd.jpg";
+import { useEffect, useState } from "react";
+import background from "../assets/background.jpg";
 import * as SQLite from "expo-sqlite";
 import { DB } from "../global";
+import CalendarForm from "./calendarForm";
+import axios from "axios";
+
 
 export default function Calendar() {
-  const [modalOpen, setModalOpen] = useState(false);
 
+//adding an event start
+    //control open and close of event form 
+  const [modalOpen, setModalOpen] = useState(false);
+  const [clickedDay, setClickedDay] = useState()
+  function handleDateClick(day){
+    setModalOpen(true)
+    setClickedDay(day)
+    }
+
+const [eventsList, setEventslist] = useState([{event: 'oneEwvent'}])
+
+//adding an event end
+
+//calendar structure start
   const [currentDate, setCurrentDate] = useState(new Date());
   const [currentDay, setCurrentDay] = useState(currentDate.getDate());
   const currentMonth = currentDate.getMonth();
   const currentYear = currentDate.getFullYear()
-
   const firstDayOfMonth = currentDate.getDay();
+  const months = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "Aug",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
 
+
+  //need to either set up ATS expecions to allow requests to HTTP (apple does not allow) 
+  //or set up express sever with HTTPS - need to use openSSL to certify localhost in order to have https though 
+  //and xCode 
+  useEffect(()=>{
+  async function fetchData() {
+    try {
+      const response = await fetch('http://localhost:7002/', {headers: {
+        "accept": "application/json"
+      }});
+      const data = await response.json();
+      console.log(data);
+    } catch (error) {
+      console.error(error);
+    }
+  }  
+  fetchData()
+}, [])
+
+  //function to set up rows for calendar
+  function collums(row, x) {
+    columnElements = [];
+    for (let i = 0; i < 7; i++) {
+        //returns a coloured button to indicate it is the current day
+      if (i + row * 7 + x == currentDay) {
+        columnElements.push(
+          <Pressable key={i + row * 7 + x} style={styles.currDay} onPress={()=>handleDateClick(i + row * 7 + x)}>
+            <Text>{i + row * 7 + x}</Text>
+          </Pressable>
+        );
+      } else if (
+        i + row * 7 + x > 0 &&
+        i + row * 7 + x < 32 &&
+        i + row * 7 + x != currentDay
+      ) {
+        columnElements.push(
+          <Pressable key={i + row * 7 + x} style={styles.day} onPress={()=>handleDateClick(i + row * 7 + x)}>
+            <Text>{i + row * 7 + x}</Text>
+          </Pressable>
+        );
+      } else {
+        //returns blank squares
+        columnElements.push(
+          <View key={i + row * 7 + x} style={styles.emptyday}></View>
+        );
+      }
+    }
+    return columnElements;
+  }
+
+  //function to move to next month
   function nextMonth() {
     const newDate = new Date(currentDate);
     // Update the month of the new Date object
@@ -35,6 +116,7 @@ export default function Calendar() {
     }
   }
 
+  //function to move to prev month
   function prevMonth() {
     const newDate = new Date(currentDate);
     // Update the month of the new Date object
@@ -51,57 +133,38 @@ export default function Calendar() {
     }
   }
 
-  const months = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "Aug",
-    "September",
-    "October",
-    "November",
-    "December",
-  ];
-
-  function collums(row, x) {
-    columnElements = [];
-    for (let i = 0; i < 7; i++) {
-      if (i + row * 7 + x == currentDay) {
-        columnElements.push(
-          <Pressable key={i + row * 7 + x} style={styles.currDay}>
-            <Text>{i + row * 7 + x}</Text>
-          </Pressable>
-        );
-      } else if (
-        i + row * 7 + x > 0 &&
-        i + row * 7 + x < 32 &&
-        i + row * 7 + x != currentDay
-      ) {
-        columnElements.push(
-          <Pressable key={i + row * 7 + x} style={styles.day}>
-            <Text>{i + row * 7 + x}</Text>
-          </Pressable>
-        );
-      } else {
-        columnElements.push(
-          <View key={i + row * 7 + x} style={styles.emptyday}></View>
-        );
-      }
-    }
-    return columnElements;
-  }
   const back = "<";
   const next = ">";
+//calendar structure end
+
+
+
+
   return (
-    <View>
+    <ImageBackground
+    source={background}
+    resizeMode="cover"
+    style={styles.image}>
+    <View style={styles.container}>
       <Modal
         visible={modalOpen}
         animationType="slide"
         setModalOpen={setModalOpen}
-      ></Modal>
+      >
+      <CalendarForm date={clickedDay + " " + months[currentMonth]} setModalOpen={setModalOpen} addEvent={setEventslist}/>
+    </Modal>
+
+
+    <FlatList
+            data={eventsList}
+            renderItem={({ item }) => (
+              <View >
+                <Text>{item.id}</Text>
+              </View>
+            )}
+          />
+
+
       <View style={styles.header}>
         <Pressable onPress={prevMonth}>
           <Text style={styles.arrows}>{back}</Text>
@@ -142,10 +205,14 @@ export default function Calendar() {
         <View style={styles.column}>{collums(4, 3 - firstDayOfMonth)}</View>
       </View>
     </View>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
+    container: {
+        height: '100%'
+    },
   header: {
     display: "flex",
     flexDirection: "row",
@@ -200,7 +267,12 @@ const styles = StyleSheet.create({
   },
   monthTitle: {
     fontSize: 30,
-    color: "#6C7AAD",
+    color: "#F1E3D6",
     textAlign: "center",
+  },
+  image: {
+    flex: 1,
+    justifyContent: "center",
+    opacity: 0.8
   },
 });
