@@ -2,6 +2,7 @@ import { createStackNavigator } from 'react-navigation-stack'
 import { createAppContainer} from 'react-navigation'
 import Home from '../screens/Home'
 import Details from '../screens/Details'
+import Calendar from '../screens/Calendar'
 
 const screens = {
      Home: {
@@ -10,6 +11,9 @@ const screens = {
     Details: {
       screen: Details,
     },
+    Calendar: {
+      screen : Calendar
+    }
   };
   
 

@@ -18,6 +18,7 @@ import AddForm from "./reviewForm";
 import * as SQLite from 'expo-sqlite'
 import Details from "./Details";
 import { DB } from "../global";
+import Calendar from "./Calendar";
 
 export default function Home({ navigation }) {
 
@@ -55,7 +56,7 @@ export default function Home({ navigation }) {
             (txObj, resultSet) => console.log(resultSet.rows._array),
             (txObj, error) => console.log(error));
 
-            // tx.executeSql('DROP TABLE projects', null);
+            tx.executeSql('DROP TABLE projects', null);
         });
     }, []);
 
@@ -112,7 +113,11 @@ export default function Home({ navigation }) {
               </View>
             )}
           />
-
+<Pressable
+onPress={() => {
+    navigation.navigate("Calendar");
+  }}
+  ><Text>Calendar</Text></Pressable>
           <Pressable
             style={styles.addBtn}
             onPress={() => {
