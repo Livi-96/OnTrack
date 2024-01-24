@@ -3,6 +3,7 @@ import { createAppContainer} from 'react-navigation'
 import Home from '../screens/Home'
 import Details from '../screens/Details'
 import Calendar from '../screens/Calendar'
+import CycleCalculator from '../screens/CycleCalc'
 
 const screens = {
      Home: {
@@ -13,6 +14,9 @@ const screens = {
     },
     Calendar: {
       screen : Calendar
+    },
+    CycleCalculator: {
+      screen : CycleCalculator
     }
   };
   

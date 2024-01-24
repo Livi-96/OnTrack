@@ -3,51 +3,69 @@ import { StyleSheet, Text, View, Pressable, TextInput, ImageBackground } from "r
 import { useState, useEffect } from "react";
 import background from '../assets/formBackGround.png'
 
-export default function CalendarForm({ setModalOpen, date, day, month, year, setEventslist }) {
+export default function CycleCalculator({ setModalOpen, date, day, month, year, setEventslist }) {
+
+const [cycleLength, setCycleLength] = useState()
+
   return (
     <ImageBackground
     source={background}
       resizeMode="cover"
       style={styles.image}>
     <View style={styles.modalContainer}>
-        <Text style={styles.title}>{date}</Text>
+        <Text>In order to predict your cycle, we will need you to provide some information on your previous cycles:</Text>
       <Formik
-        initialValues={{ event: "", notes: ""}}
+        initialValues={{ one: "", two: "", three: ""}}
         onSubmit={(values) => {
-          values = {...values, day: day, month: month, year: year}
-          setEventslist((curr) => [...curr, values])
+         let days =  (+values.one) + (+values.two) + (+values.three)
+         let av = days/3
+         setCycleLength(Math.round(av))
         }}
       >
         {(formProps) => (
           <View>
+            <Text>Days between cycle: {cycleLength}</Text>
+            <Text>1:</Text>
             <TextInput
               style={styles.input}
-              placeholder="Add event"
-              onChangeText={formProps.handleChange("event")}
-              value={formProps.values.event}
+              placeholder="eg 28"
+              onChangeText={formProps.handleChange("one")}
+              value={formProps.values.one}
+              keyboardType="numeric"
+            />
+            <Text>2:</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="eg 28"
+              onChangeText={formProps.handleChange("two")}
+              value={formProps.values.two}
+              keyboardType="numeric"
             />
 
+            <Text>3:</Text>
             <TextInput
-              style={styles.longinput}
-              placeholder="Add progress notes"
-              onChangeText={formProps.handleChange("notes")}
-              value={formProps.values.notes}
-              multiline
-              numberOfLines={4}
+              style={styles.input}
+              placeholder="eg 28"
+              onChangeText={formProps.handleChange("three")}
+              value={formProps.values.three}
+              keyboardType="numeric"
             />
 
             <View style={styles.addCancelBttns}>
         <Pressable
           style={styles.addBtn}
-          onPress={()=>{formProps.handleSubmit(); setModalOpen(false)}}
+          onPress={()=>{formProps.handleSubmit(); 
+            // setModalOpen(false)
+        }
+        }
         >
           <Text style={styles.addBtnTxt}>Add</Text>
         </Pressable>
         <Pressable
           style={styles.addBtn}
-          onPress={() => {
-            setModalOpen(false);
-          }}
+        //   onPress={() => {
+        //     setModalOpen(false);
+        //   }}
         >
           <Text style={styles.addBtnTxt}>Cancel</Text>
         </Pressable>

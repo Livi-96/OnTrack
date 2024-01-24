@@ -9,19 +9,19 @@ import {
   Button,
   FlatList,
   ActivityIndicator,
-  Modal
+  Modal,
 } from "react-native";
 import background from "../assets/background.jpg";
 import ProjectButton from "../componants/buttons";
-import { useState, useEffect} from "react";
+import { useState, useEffect } from "react";
 import AddForm from "./reviewForm";
-import * as SQLite from 'expo-sqlite'
+import * as SQLite from "expo-sqlite";
 import Details from "./Details";
 import { DB } from "../global";
 import Calendar from "./Calendar";
+import CycleCalculator from "./CycleCalc";
 
 export default function Home({ navigation }) {
-
   const pressHandler = () => {
     navigation.push("Details");
   };
@@ -29,17 +29,16 @@ export default function Home({ navigation }) {
   const [modalOpen, setModalOpen] = useState(false);
 
   // sqlite database
-  
-  const [projects, setProjects] = useState(null)
 
-//   const MyContext = createContext(setProjects)
+  const [projects, setProjects] = useState(null);
 
-    // const DB = SQLite.openDatabase('projects.db')
+  //   const MyContext = createContext(setProjects)
 
-    useEffect(() => {
-        DB.transaction(tx => {
+  // const DB = SQLite.openDatabase('projects.db')
 
-            tx.executeSql(`CREATE TABLE IF NOT EXISTS projects
+  useEffect(() => {
+    DB.transaction((tx) => {
+      tx.executeSql(`CREATE TABLE IF NOT EXISTS projects
             ( id INTEGER PRIMARY KEY AUTOINCREMENT,
                 title TEXT,
                 description TEXT,
@@ -47,38 +46,42 @@ export default function Home({ navigation }) {
                 language TEXT,
                 completed BOOLEAN)`);
 
-            tx.executeSql(`INSERT INTO projects
+      tx.executeSql(`INSERT INTO projects
             (title, description, notes, language)
             VALUES('On Track', 'This is an app', 'Its going ok', 'React Native')`);
-            
-            tx.executeSql(`SELECT * FROM projects`, null,
-            (txObj, resultSet) => setProjects(resultSet.rows._array),
-            (txObj, resultSet) => console.log(resultSet.rows._array),
-            (txObj, error) => console.log(error));
 
-            tx.executeSql('DROP TABLE projects', null);
-        });
-    }, []);
+      tx.executeSql(
+        `SELECT * FROM projects`,
+        null,
+        (txObj, resultSet) => setProjects(resultSet.rows._array),
+        (txObj, resultSet) => console.log(resultSet.rows._array),
+        (txObj, error) => console.log(error)
+      );
 
-    // sqlite database
+      tx.executeSql("DROP TABLE projects", null);
+    });
+  }, []);
+
+  // sqlite database
 
   // Form Logic
 
-  function addProject(values){
-
-    DB.transaction( tx => {
-
-            tx.executeSql(`INSERT INTO projects
+  function addProject(values) {
+    DB.transaction((tx) => {
+      tx.executeSql(
+        `INSERT INTO projects
             (title, description, notes, language)
-            VALUES(?, ?, ?, ?)`, [values.title, values.description, values.notes, values.language]);
+            VALUES(?, ?, ?, ?)`,
+        [values.title, values.description, values.notes, values.language]
+      );
 
-            tx.executeSql(`SELECT * FROM projects`, null,
-            (txObj, resultSet) => setProjects(resultSet.rows._array),
-            (txObj, error) => console.log(error));
-    }
-
-    
-    )
+      tx.executeSql(
+        `SELECT * FROM projects`,
+        null,
+        (txObj, resultSet) => setProjects(resultSet.rows._array),
+        (txObj, error) => console.log(error)
+      );
+    });
   }
 
   // Form Logic
@@ -90,18 +93,32 @@ export default function Home({ navigation }) {
       style={styles.image}
     >
       <View style={styles.container}>
-        <Modal visible={modalOpen} animationType="slide" setModalOpen={setModalOpen}>
-            <AddForm setModalOpen={setModalOpen} addProject={addProject}/>
+        <Modal
+          visible={modalOpen}
+          animationType="slide"
+          setModalOpen={setModalOpen}
+        >
+          <AddForm setModalOpen={setModalOpen} addProject={addProject} />
         </Modal>
         <Text style={styles.title}>On Track</Text>
         <StatusBar style="auto" />
         <View style={styles.projectBtnContainer}>
-            {projects ? <Text></Text> : <Text style={styles.noprojtxt}>You do not currently have any projects.</Text> }
+          {projects ? (
+            <Text></Text>
+          ) : (
+            <Text style={styles.noprojtxt}>
+              You do not currently have any projects.
+            </Text>
+          )}
           <FlatList
             data={projects}
             renderItem={({ item }) => (
               <View style={styles.projectBtns}>
-                <ProjectButton id={item.id} style={styles.projectComp} item={item} />
+                <ProjectButton
+                  id={item.id}
+                  style={styles.projectComp}
+                  item={item}
+                />
                 <Pressable
                   onPress={() => {
                     navigation.navigate("Details", item);
@@ -113,11 +130,25 @@ export default function Home({ navigation }) {
               </View>
             )}
           />
-<Pressable
-onPress={() => {
-    navigation.navigate("Calendar");
-  }}
-  ><Text>Calendar</Text></Pressable>
+
+          <Pressable
+            style={styles.addBtn}
+            onPress={() => {
+              navigation.navigate("CycleCalculator");
+            }}
+          >
+            <Text style={styles.addBtnTxt}>CycleCalculator</Text>
+          </Pressable>
+
+          <Pressable
+            style={styles.addBtn}
+            onPress={() => {
+              navigation.navigate("Calendar");
+            }}
+          >
+            <Text style={styles.addBtnTxt}>Calendar</Text>
+          </Pressable>
+
           <Pressable
             style={styles.addBtn}
             onPress={() => {
@@ -203,13 +234,13 @@ const styles = StyleSheet.create({
     fontSize: 30,
   },
   addCancelBttns: {
-    display: 'flex',
-    flexDirection: 'row'
-  }, 
+    display: "flex",
+    flexDirection: "row",
+  },
   noprojtxt: {
-    color: '#F4DDC2',
+    color: "#F4DDC2",
     fontSize: 30,
-    textAlign: 'center',
-    marginTop: 40
-  }
+    textAlign: "center",
+    marginTop: 40,
+  },
 });
