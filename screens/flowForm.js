@@ -2,11 +2,24 @@ import { Formik } from "formik";
 import { StyleSheet, Text, View, Pressable, TextInput, ImageBackground } from "react-native";
 import { useState, useEffect } from "react";
 import background from '../assets/formBackGround.png'
+import Slider from '@react-native-community/slider';
+import Dropdown from "../componants/dropdown";
 
-
-export default function CalendarForm({ setModalOpen, date, day, month, year, setEventslist }) {
+export default function FlowForm({ setModalOpen, date, day, month, year, setEventslist }) {
 
 const [fillHeight, setFillHeight] = useState(0)
+const [dropDown, setDropDown] = useState()
+function flowRate(){
+  let flowPercent = Math.round(fillHeight/200 * 100)
+  console.log(fillHeight)
+  if (flowPercent > 60) {
+    return 'Heavy';
+} else if (flowPercent < 40) {
+    return 'Light';
+} else {
+    return 'Medium';
+}
+}
 
   return (
     <ImageBackground
@@ -16,24 +29,36 @@ const [fillHeight, setFillHeight] = useState(0)
     <View style={styles.modalContainer}>
         <Text style={styles.title}>{date}</Text>
       <Formik
-        initialValues={{ event: "", notes: ""}}
+        initialValues={{notes: ""}}
         onSubmit={(values) => {
-          values = {...values, day: day, month: month, year: year}
+          values = {...values,event: dropDown, flow: fillHeight, day: day, month: month, year: year}
           setEventslist((curr) => [...curr, values])
         }}
       >
         {(formProps) => (
+          
           <View>
-            <TextInput
-              style={styles.input}
-              placeholder="Add event"
-              onChangeText={formProps.handleChange("event")}
-              value={formProps.values.event}
-            />
+
+<Dropdown label='Select event option' setDropDown={setDropDown} />
+
+<View style={styles.sliderContainer}>
+    <View style={styles.circle} ><View style={[styles.circlefill, {height: fillHeight}]} /><Text style={styles.flowText}>{flowRate()}</Text></View>
+    <Slider
+  style={[{width: 200, height: 30}, styles.slider]}
+  minimumValue={0}
+  maximumValue={200}
+  minimumTrackTintColor="#F4DDC2"
+  maximumTrackTintColor="#F1E3D6"
+  onValueChange={(e)=>{setFillHeight(e)}}
+  thumbTintColor="#F1E3D6"
+  tapToSeek
+  value={fillHeight}
+/></View>
+
 
             <TextInput
               style={styles.longinput}
-              placeholder="Add progress notes"
+              placeholder="Add notes"
               onChangeText={formProps.handleChange("notes")}
               value={formProps.values.notes}
               multiline
@@ -65,6 +90,42 @@ const [fillHeight, setFillHeight] = useState(0)
 }
 
 const styles = StyleSheet.create({
+  flowText: {
+    position: 'absolute',
+    top: '35%',
+    color: 'rgba(255, 255, 255, 0.8)',
+    fontSize: 40,
+    margin: 0,
+    padding: 0
+  },
+  sliderContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center'
+  },
+  slider: {
+    borderWidth: 20
+  },
+  circle: {
+    marginTop: 10,
+    height: 200,
+    width: 200,
+    borderRadius: 300,
+    backgroundImage: 'linear-gradient(to bottom, #ff0000, #0000ff)',
+    borderWidth: 2,
+    borderStyle: 'solid',
+    borderColor: 'red',
+    overflow: 'hidden',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'flex-end',
+    alignItems: 'center'
+  },
+  circlefill: {
+    width: 300,
+    backgroundImage: 'linear-gradient(to bottom, #ff0000, #0000ff)',
+    backgroundColor: 'red'
+  },
     modalContainer: {
     flex: 1,
     display: "flex",
@@ -76,7 +137,7 @@ const styles = StyleSheet.create({
   title: {
     color: "#F4DDC2",
     fontSize: 40,
-    marginTop: 200
+    marginTop: 2
   },
   image: {
     flex: 1,

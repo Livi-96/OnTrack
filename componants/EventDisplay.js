@@ -1,8 +1,20 @@
 import { StyleSheet, Text, View, ImageBackground, Pressable } from 'react-native';
 import background from '../assets/formBackGround.png'
+import { useEffect, useState } from 'react';
 
 
 export default function EventDisplay({ event, setOpenEvent }){
+
+  function flowRate(){
+    let flowRate = Math.round(event.flow/200 * 100)
+    if (flowRate > 60) {
+      return 'Heavy';
+  } else if (flowRate < 40) {
+      return 'Light';
+  } else {
+      return 'Medium';
+  }
+  }
 
 return (
     <ImageBackground
@@ -14,6 +26,7 @@ return (
            {event.event}
         </Text>
         <Text style={styles.notesCont} >Event details: {event.notes}</Text>
+        <Text style={styles.notesCont} >Flow: {flowRate()}</Text>
         <View style={styles.bttnsCont}>
         <Pressable  style={styles.addBtn} onPress={()=>{setOpenEvent(false)}}> 
         <Text style={styles.addBtnTxt}>
@@ -22,7 +35,6 @@ return (
         </Pressable>
         <Pressable
             style={styles.addBtn}
-            
           >
             <Text style={styles.addBtnTxt}>Delete</Text>
           </Pressable>
